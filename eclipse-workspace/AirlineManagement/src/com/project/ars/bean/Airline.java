@@ -1,7 +1,6 @@
 package com.project.ars.bean;
 
 
-
 public class Airline {
     private int id;
     private String name;

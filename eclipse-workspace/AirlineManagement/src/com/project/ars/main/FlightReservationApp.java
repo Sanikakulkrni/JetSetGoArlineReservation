@@ -1,13 +1,20 @@
 package com.project.ars.main;
 
+import com.project.ars.bean.*;
+import com.project.ars.manager.*;
 import com.project.ars.operations.UserDAO;
-import com.project.ars.bean.User;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class FlightReservationApp {
     private static final Scanner scanner = new Scanner(System.in);
     private static final UserDAO userDAO = new UserDAO();
+    private static final FlightManager flightManager = new FlightManager();
+    private static final BookingManager bookingManager = new BookingManager();
+    private static final PassengerManager passengerManager = new PassengerManager();
+    private static final AirportManager airportManager = new AirportManager();
+    private static final AirlineManager airlineManager = new AirlineManager();
     private static User loggedInUser = null; // Track the logged-in user
 
     public static void main(String[] args) {
@@ -29,7 +36,7 @@ public class FlightReservationApp {
                     System.out.println("Invalid choice. Please try again.");
             }
         }
-        
+
         // If logged in, display the main menu
         mainMenu();
     }
@@ -73,13 +80,14 @@ public class FlightReservationApp {
             System.out.println("Login failed. Please try again.");
         }
     }
+
     private static void mainMenu() {
         while (true) {
             displayMenu();  // Display main menu options
             int choice = getUserChoice();  // Get user's choice
             switch (choice) {
                 case 1:
-                    addFlight();
+                    checkAdminAccess(() -> addFlight());
                     break;
                 case 2:
                     viewFlights();
@@ -100,22 +108,22 @@ public class FlightReservationApp {
                     viewBookings();
                     break;
                 case 8:
-                    updateFlightDetails();
+                    checkAdminAccess(() -> updateFlightDetails());
                     break;
                 case 9:
                     searchFlights();
                     break;
                 case 10:
-                    generateReports();
+                    checkAdminAccess(() -> generateReports());
                     break;
                 case 11:
-                    addAirline();
+                    checkAdminAccess(() -> addAirline());
                     break;
                 case 12:
                     viewAirlines();
                     break;
                 case 13:
-                    manageAirports();
+                    checkAdminAccess(() -> manageAirports());
                     break;
                 case 14:
                     updatePassengerDetails();
@@ -133,68 +141,12 @@ public class FlightReservationApp {
         }
     }
 
-    
-
-    // Existing main menu and functionalities go here...
-    // Existing methods for each functionality
-    private static void addFlight() {
-        // Logic for adding a flight
-    }
-
-    private static void viewFlights() {
-        // Logic for viewing flights
-    }
-
-    private static void addPassenger() {
-        // Logic for adding a passenger
-    }
-
-    private static void viewPassengers() {
-        // Logic for viewing passengers
-    }
-
-    private static void bookFlight() {
-        // Logic for booking a flight
-    }
-
-    private static void cancelBooking() {
-        // Logic for canceling a booking
-    }
-
-    private static void viewBookings() {
-        // Logic for viewing bookings
-    }
-
-    private static void updateFlightDetails() {
-        // Logic for updating flight details
-    }
-
-    private static void searchFlights() {
-        // Logic for searching flights
-    }
-
-    private static void generateReports() {
-        // Logic for generating reports
-    }
-
-    private static void addAirline() {
-        // Logic for adding an airline
-    }
-
-    private static void viewAirlines() {
-        // Logic for viewing airlines
-    }
-
-    private static void manageAirports() {
-        // Logic for managing airports
-    }
-
-    private static void updatePassengerDetails() {
-        // Logic for updating passenger details
-    }
-
-    private static void viewFlightAvailability() {
-        // Logic for viewing flight availability
+    private static void checkAdminAccess(Runnable action) {
+        if ("admin".equalsIgnoreCase(loggedInUser.getRole())) {
+            action.run();
+        } else {
+            System.out.println("Access denied. Admins only.");
+        }
     }
 
     private static void displayMenu() {
@@ -220,5 +172,110 @@ public class FlightReservationApp {
     private static int getUserChoice() {
         System.out.print("Enter your choice: ");
         return scanner.nextInt();
+    }
+
+    // Methods for each functionality
+    private static void addFlight() {
+        System.out.println("Enter flight details:");
+        // Collect flight details from user
+        Flight flight = new Flight();
+        // Set flight details from user input
+        flightManager.addFlight(flight);
+        System.out.println("Flight added successfully.");
+    }
+
+    private static void viewFlights() {
+        List<Flight> flights = flightManager.getAllFlights();
+        // Display flights
+    }
+
+    private static void addPassenger() {
+        System.out.println("Enter passenger details:");
+        // Collect passenger details from user
+        Passenger passenger = new Passenger();
+        // Set passenger details from user input
+        passengerManager.addPassenger(passenger);
+        System.out.println("Passenger added successfully.");
+    }
+
+    private static void viewPassengers() {
+        List<Passenger> passengers = passengerManager.getAllPassengers();
+        // Display passengers
+    }
+
+    private static void bookFlight() {
+        System.out.println("Enter booking details:");
+        // Collect booking details from user
+        Booking booking = new Booking();
+        // Set booking details from user input
+        bookingManager.addBooking(booking);
+        System.out.println("Flight booked successfully.");
+    }
+
+    private static void cancelBooking() {
+        System.out.print("Enter booking ID to cancel: ");
+        int bookingId = scanner.nextInt();
+        bookingManager.deleteBooking(bookingId);
+        System.out.println("Booking canceled successfully.");
+    }
+
+    private static void viewBookings() {
+        List<Booking> bookings = bookingManager.getAllBookings();
+        // Display bookings
+    }
+
+    private static void updateFlightDetails() {
+        System.out.println("Enter updated flight details:");
+        // Collect updated flight details from user
+        Flight flight = new Flight();
+        // Set flight details from user input
+        flightManager.updateFlight(flight);
+        System.out.println("Flight updated successfully.");
+    }
+
+    private static void searchFlights() {
+        System.out.print("Enter flight code or other criteria: ");
+        String criteria = scanner.next();
+        Flight flight = flightManager.getFlight(criteria);
+        // Display flight details
+    }
+
+    private static void generateReports() {
+        // Logic for generating reports
+    }
+
+    private static void addAirline() {
+        System.out.println("Enter airline details:");
+        // Collect airline details from user
+        Airline airline = new Airline();
+        // Set airline details from user input
+        airlineManager.addAirline(airline);
+        System.out.println("Airline added successfully.");
+    }
+
+    private static void viewAirlines() {
+        List<Airline> airlines = airlineManager.getAllAirlines();
+        // Display airlines
+    }
+
+    private static void manageAirports() {
+        System.out.println("Enter airport details:");
+        // Collect airport details from user
+        Airport airport = new Airport();
+        // Set airport details from user input
+        airportManager.addAirport(airport);
+        System.out.println("Airport added successfully.");
+    }
+
+    private static void updatePassengerDetails() {
+        System.out.println("Enter updated passenger details:");
+        // Collect updated passenger details from user
+        Passenger passenger = new Passenger();
+        // Set passenger details from user input
+        // Call appropriate method from PassengerManager
+    }
+
+    private static void viewFlightAvailability() {
+        // Logic for viewing flight availability
     }
 }
